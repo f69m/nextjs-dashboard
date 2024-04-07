@@ -4,9 +4,7 @@
 import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { Statement } from 'typescript';
 import { z } from 'zod';
-
 
 const FormSchema = z.object({
     id: z.string(),
@@ -26,7 +24,18 @@ const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
 
-export async function createInvoice(prevState: State, formData: FormData) {
+// This is temporary until @types/react-dom is updated
+export type State = {
+    errors?: {
+      customerId?: string[];
+      amount?: string[];
+      status?: string[];
+    };
+    message?: string | null;
+  };
+
+
+export async function createInvoice(prevState: State, formData: FormData): Promise<State> {
     const validatedFields = CreateInvoice.safeParse({
         customerId: formData.get('customerId'),
         amount: formData.get('amount'),
