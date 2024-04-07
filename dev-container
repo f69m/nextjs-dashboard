@@ -1,0 +1,32 @@
+#!/bin/sh
+
+set -e
+
+if [ $# -gt 0 ]; then
+    command="$@"
+else
+    command="yarn dev"
+fi
+
+image=node:bookworm
+
+docker pull $image
+
+docker rm -f dashboard-dev >/dev/null 2>&1 || true
+
+docker run -it --rm  \
+    --name dashboard-dev  \
+    --hostname dashboard-dev  \
+    --publish 3000:3000  \
+    --volume .:/app  \
+    --workdir /app  \
+    --volume /home:/home  \
+    --volume /etc/passwd:/etc/passwd:ro  \
+    --volume /etc/group:/etc/group:ro  \
+    --user $(id -u):$(id -g)  \
+    $image  \
+    $command
+
+    # --label "traefik.enable=true"  \
+    # --label "traefik.http.routers.vavplan-dev.rule=Host(\`vavplan.f69m.de\`)"  \
+    # --label "traefik.http.routers.vavplan-dev.entrypoints=https"  \
